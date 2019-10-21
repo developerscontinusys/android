@@ -8,6 +8,7 @@ import android.accounts.OperationCanceledException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 
 import com.nextcloud.client.account.UserAccountManager;
 import com.nextcloud.client.di.Injectable;
@@ -19,6 +20,7 @@ import com.owncloud.android.lib.resources.status.OCCapability;
 
 import javax.inject.Inject;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
@@ -46,6 +48,14 @@ public abstract class BaseActivity extends AppCompatActivity implements Injectab
 
     public UserAccountManager getUserAccountManager() {
         return accountManager;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+
+        Account account = accountManager.getCurrentAccount();
+        setAccount(account, false);
     }
 
     @Override
@@ -91,6 +101,11 @@ public abstract class BaseActivity extends AppCompatActivity implements Injectab
         } else {
             swapToDefaultAccount();
         }
+
+        if(mCurrentAccount != null) {
+            mStorageManager = new FileDataStorageManager(mCurrentAccount, getContentResolver());
+            mCapabilities = mStorageManager.getCapability(mCurrentAccount.name);
+        }
     }
 
     /**
@@ -134,7 +149,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Injectab
      */
     @Deprecated
     protected void onAccountSet() {
-        if (getAccount() != null) {
+        if (mCurrentAccount != null) {
             mStorageManager = new FileDataStorageManager(getAccount(), getContentResolver());
             mCapabilities = mStorageManager.getCapability(mCurrentAccount.name);
         } else {
@@ -166,15 +181,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Injectab
      */
     public Account getAccount() {
         return mCurrentAccount;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if(mCurrentAccount != null) {
-            onAccountSet();
-        }
     }
 
     public FileDataStorageManager getStorageManager() {
