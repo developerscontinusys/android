@@ -62,6 +62,7 @@ import com.nextcloud.client.preferences.AppPreferencesImpl;
 import com.owncloud.android.BuildConfig;
 import com.owncloud.android.MainApp;
 import com.owncloud.android.R;
+import com.owncloud.android.authentication.AuthenticatorActivity;
 import com.owncloud.android.authentication.PassCodeManager;
 import com.owncloud.android.datamodel.ArbitraryDataProvider;
 import com.owncloud.android.datamodel.ExternalLinksProvider;
@@ -750,6 +751,11 @@ public class SettingsActivity extends PreferenceActivity
                 davDroidLoginIntent.putExtra("url", serverBaseUri.toString() + DAV_PATH);
             }
             davDroidLoginIntent.putExtra("username", UserAccountManager.getUsername(account));
+
+            davDroidLoginIntent.putExtra("loginFlow", 1);
+            davDroidLoginIntent.setData(Uri.parse(serverBaseUri.toString() + AuthenticatorActivity.WEB_LOGIN));
+            davDroidLoginIntent.putExtra("davPath", DAV_PATH);
+
             startActivityForResult(davDroidLoginIntent, ACTION_REQUEST_CODE_DAVDROID_SETUP);
         } else {
             // DAVdroid not installed
